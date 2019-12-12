@@ -25,9 +25,10 @@ NS_ASSUME_NONNULL_BEGIN
 - (id)initWithDownloadDelegate:(id <ZBDownloadDelegate>)delegate repo:(ZBRepo *)repo;
 - (id)initWithDownloadDelegate:(id <ZBDownloadDelegate>)delegate repoURLs:(NSArray <NSURL *> *)repoURLs;
 - (id)initWithSourceListPath:(NSString *)trail;
-- (void)downloadRepos:(NSArray <ZBRepo *> *)repos ignoreCaching:(BOOL)ignore;
 - (void)downloadRepo:(ZBRepo *)repo;
-- (void)downloadReposAndIgnoreCaching:(BOOL)ignore;
+- (void)downloadRepos:(NSArray <ZBRepo *> *)repos ignoreCaching:(BOOL)ignore;
+
+//- (void)downloadReposAndIgnoreCaching:(BOOL)ignore;
 - (void)downloadPackages:(NSArray <ZBPackage *> *)packages;
 - (void)stopAllDownloads;
 @end
