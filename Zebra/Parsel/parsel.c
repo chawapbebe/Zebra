@@ -265,9 +265,10 @@ void createDummyRepo(const char *sourcePath, const char *path, sqlite3 *database
     
     dict_add(repo, "BaseURL", baseFilename);
     dict_add(repo, "Origin", baseFilename);
+    dict_add(repo, "Label", baseFilename);
     dict_add(repo, "Description", "No Description Provided");
-    dict_add(repo, "Suite", "stable");
-    dict_add(repo, "Components", "main");
+    dict_add(repo, "Suite", "./");
+    dict_add(repo, "Version", "1.0");
     
     int def = 0;
     if (strstr(baseFilename, "dists") != NULL) {
@@ -276,16 +277,17 @@ void createDummyRepo(const char *sourcePath, const char *path, sqlite3 *database
     
     sqlite3_stmt *insertStatement;
     
-    if (sqlite3_prepare_v2(database, repoInsertQuery, -1, &insertStatement, 0) == SQLITE_OK) {
-        sqlite3_bind_text(insertStatement, 1 + ZBRepoColumnOrigin, dict_get(repo, "Origin"), -1, SQLITE_TRANSIENT);
-        sqlite3_bind_text(insertStatement, 1 + ZBRepoColumnDescription, dict_get(repo, "Description"), -1, SQLITE_TRANSIENT);
-        sqlite3_bind_text(insertStatement, 1 + ZBRepoColumnBaseFilename, dict_get(repo, "BaseFileName"), -1, SQLITE_TRANSIENT);
-        sqlite3_bind_text(insertStatement, 1 + ZBRepoColumnBaseURL, dict_get(repo, "BaseURL"), -1, SQLITE_TRANSIENT);
-        sqlite3_bind_int(insertStatement, 1 + ZBRepoColumnSecure, secure);
-        sqlite3_bind_int(insertStatement, 1 + ZBRepoColumnRepoID, repoID);
-        sqlite3_bind_int(insertStatement, 1 + ZBRepoColumnDef, def);
-        sqlite3_bind_text(insertStatement, 1 + ZBRepoColumnSuite, dict_get(repo, "Suite"), -1, SQLITE_TRANSIENT);
-        sqlite3_bind_text(insertStatement, 1 + ZBRepoColumnComponents, dict_get(repo, "Components"), -1, SQLITE_TRANSIENT);
+    if (sqlite3_prepare_v2(database, "INSERT INTO REPOS(ORIGIN, LABEL, SUITE, VERSION, DESCRIPTION, BASEFILENAME, BASEURL, SECURE, REPOID) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)", -1, &insertStatement, 0) == SQLITE_OK) {
+        sqlite3_bind_text(insertStatement, 1, dict_get(repo, "Origin"), -1, SQLITE_TRANSIENT);
+        sqlite3_bind_text(insertStatement, 2, dict_get(repo, "Label"), -1, SQLITE_TRANSIENT);
+        sqlite3_bind_text(insertStatement, 3, dict_get(repo, "Suite"), -1, SQLITE_TRANSIENT);
+        sqlite3_bind_text(insertStatement, 4, dict_get(repo, "Version"), -1, SQLITE_TRANSIENT);
+        sqlite3_bind_text(insertStatement, 5, dict_get(repo, "Codename"), -1, SQLITE_TRANSIENT);
+        sqlite3_bind_text(insertStatement, 6, dict_get(repo, "Description"), -1, SQLITE_TRANSIENT);
+        sqlite3_bind_text(insertStatement, 7, baseFilename, -1, SQLITE_TRANSIENT);
+        sqlite3_bind_text(insertStatement, 8, dict_get(repo, "BaseURL"), -1, SQLITE_TRANSIENT);
+        sqlite3_bind_int(insertStatement, 9, secure);
+        sqlite3_bind_int(insertStatement, 10, repoID);
         sqlite3_step(insertStatement);
     } else {
         printf("sql error: %s", sqlite3_errmsg(database));
