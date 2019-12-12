@@ -50,6 +50,7 @@ typedef enum {
     ZBRepoColumnDescription,
     ZBRepoColumnBaseFilename,
     ZBRepoColumnSecure,
+    ZBRepoColumnBaseURL,
     ZBRepoColumnRepoID
 } ZBRepoColumn;
 
