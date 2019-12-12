@@ -650,6 +650,8 @@
 				49C526EC227BCF1700840484 /* ZBRepoTableViewCell.h */,
 				49C526ED227BCF1700840484 /* ZBRepoTableViewCell.m */,
 				9E06A9EE22D0842400DBBC38 /* ZBRepoTableViewCell.xib */,
+				89E5F72623A2E86D008ADC6F /* ZBBaseRepo.h */,
+				89E5F72723A2E86D008ADC6F /* ZBBaseRepo.m */,
 				896F11C121B231900017B581 /* ZBRepo.h */,
 				896F11C221B231900017B581 /* ZBRepo.m */,
 				896F11BB21B231490017B581 /* ZBRepoManager.h */,
@@ -791,8 +793,6 @@
 				89CADA162263FF00000101EE /* ZBDownloadDelegate.h */,
 				89CADA132263FEF3000101EE /* ZBDownloadManager.h */,
 				89CADA142263FEF3000101EE /* ZBDownloadManager.m */,
-				89E5F72623A2E86D008ADC6F /* ZBBaseRepo.h */,
-				89E5F72723A2E86D008ADC6F /* ZBBaseRepo.m */,
 			);
 			path = Downloads;
 			sourceTree = "<group>";

@@ -18,15 +18,11 @@
 @synthesize origin;
 @synthesize desc;
 @synthesize baseFileName;
-@synthesize baseURL;
 @synthesize secure;
 @synthesize repoID;
 @synthesize iconURL;
-@synthesize defaultRepo;
-@synthesize suite;
-@synthesize components;
-@synthesize shortURL;
 @synthesize supportSileoPay;
+@synthesize displayableURL;
 
 + (ZBRepo *)repoMatchingRepoID:(int)repoID {
     return [[ZBRepoManager sharedInstance] repos][@(repoID)];
@@ -52,27 +48,6 @@
     NSString *baseURL = divide > [urlString length] ? urlString : [urlString substringFromIndex:divide];
     
     return [databaseManager repoIDFromBaseURL:baseURL] > 0;
-}
-
-- (id)initWithOrigin:(NSString *)origin description:(NSString *)description baseFileName:(NSString *)bfn baseURL:(NSString *)baseURL secure:(BOOL)sec repoID:(int)repoIdentifier iconURL:(NSURL *)icoURL isDefault:(BOOL)isDefault suite:(NSString *)sweet components:(NSString *)comp shortURL:(NSString *)shortA {
-    
-    self = [super init];
-    
-    if (self) {
-        [self setOrigin:origin];
-        [self setDesc:description];
-        [self setBaseFileName:bfn];
-        [self setBaseURL:baseURL];
-        [self setSecure:sec];
-        [self setRepoID:repoIdentifier];
-        [self setIconURL:icoURL];
-        [self setDefaultRepo:isDefault];
-        [self setSuite:sweet];
-        [self setComponents:comp];
-        [self setShortURL:shortA];
-    }
-    
-    return self;
 }
 
 - (id)initWithSQLiteStatement:(sqlite3_stmt *)statement {

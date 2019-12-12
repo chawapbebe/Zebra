@@ -10,6 +10,11 @@
 
 @implementation ZBBaseRepo
 
+@synthesize archiveType;
+@synthesize repoistoryURL;
+@synthesize distribution;
+@synthesize components;
+
 + (NSArray *)baseReposFromSourceList:(NSString *)sourceListPath {
     NSError *readError;
     NSString *sourceListContents = [NSString stringWithContentsOfFile:sourceListPath encoding:NSUTF8StringEncoding error:&readError];
@@ -69,10 +74,6 @@
     }
     
     return [super init];
-}
-
-
-- (NSString *)debLineFromRepo:(ZBRepo *)repo {
 }
 
 - (id)initFromRepo:(ZBRepo *)repo {
