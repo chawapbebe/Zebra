@@ -16,13 +16,19 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @protocol ZBDownloadDelegate <NSObject>
-- (void)predator:(ZBDownloadManager *)downloadManager startedDownloadForFile:(NSString *)filename;
-- (void)predator:(ZBDownloadManager *)downloadManager finishedDownloadForFile:(NSString *_Nullable)filename withError:(NSError *_Nullable)error;
-- (void)predator:(ZBDownloadManager *)downloadManager finishedAllDownloads:(NSDictionary *)filenames;
 @optional
-- (void)predator:(ZBDownloadManager *)downloadManager progressUpdate:(CGFloat)progress forPackage:(ZBPackage *)package;
-- (void)setRepo:(NSString *)repo downloading:(BOOL)downloading;
 - (void)postStatusUpdate:(NSString *)status atLevel:(ZBLogLevel)level;
+
+- (void)startedRepoDownload:(NSString *)baseFilename;
+- (void)progressUpdate:(CGFloat)progress forRepo:(NSString *)baseFilename;
+- (void)finishedRepoDownload:(NSString *)baseFilename withErrors:(NSArray <NSError *> *_Nullable)errors;
+
+- (void)startedPackageDownload:(ZBPackage *)package;
+- (void)progressUpdate:(CGFloat)progress forPackage:(ZBPackage *)package;
+- (void)finishedPackageDownload:(ZBPackage *)package withError:(NSError *_Nullable)error;
+
+- (void)finishedAllDownloads:(NSDictionary *)filenames __deprecated_msg("Use a specific download finished method instead");
+- (void)finishedDownloadForFile:(NSString *_Nullable)filename withError:(NSError *_Nullable)error __deprecated_msg("Use a specific download finished method instead");
 @end
 
 NS_ASSUME_NONNULL_END
