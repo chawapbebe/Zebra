@@ -107,6 +107,7 @@
 		89CADA152263FEF3000101EE /* ZBDownloadManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 89CADA142263FEF3000101EE /* ZBDownloadManager.m */; };
 		89D230182242B27500837C3B /* default.list in Resources */ = {isa = PBXBuildFile; fileRef = 89D230172242B27500837C3B /* default.list */; };
 		89DD26862201571900CD31A0 /* ZBQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = 89DD26852201571900CD31A0 /* ZBQueue.m */; };
+		89E5F72823A2E86D008ADC6F /* ZBBaseRepo.m in Sources */ = {isa = PBXBuildFile; fileRef = 89E5F72723A2E86D008ADC6F /* ZBBaseRepo.m */; };
 		89E8633A21D5A1AA0081E485 /* ZBWebViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 89E8633921D5A1AA0081E485 /* ZBWebViewController.m */; };
 		89E8633D21D5A8C00081E485 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 89E8633C21D5A8C00081E485 /* WebKit.framework */; };
 		89E8637E21D5AFAA0081E485 /* package_depiction.html in Resources */ = {isa = PBXBuildFile; fileRef = 89E8637621D5AFA90081E485 /* package_depiction.html */; };
@@ -365,6 +366,8 @@
 		89DD26842201571900CD31A0 /* ZBQueue.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZBQueue.h; sourceTree = "<group>"; };
 		89DD26852201571900CD31A0 /* ZBQueue.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZBQueue.m; sourceTree = "<group>"; };
 		89DD26872201576500CD31A0 /* ZBQueueType.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZBQueueType.h; sourceTree = "<group>"; };
+		89E5F72623A2E86D008ADC6F /* ZBBaseRepo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZBBaseRepo.h; sourceTree = "<group>"; };
+		89E5F72723A2E86D008ADC6F /* ZBBaseRepo.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZBBaseRepo.m; sourceTree = "<group>"; };
 		89E8633821D5A1AA0081E485 /* ZBWebViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZBWebViewController.h; sourceTree = "<group>"; };
 		89E8633921D5A1AA0081E485 /* ZBWebViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZBWebViewController.m; sourceTree = "<group>"; };
 		89E8633C21D5A8C00081E485 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
@@ -788,6 +791,8 @@
 				89CADA162263FF00000101EE /* ZBDownloadDelegate.h */,
 				89CADA132263FEF3000101EE /* ZBDownloadManager.h */,
 				89CADA142263FEF3000101EE /* ZBDownloadManager.m */,
+				89E5F72623A2E86D008ADC6F /* ZBBaseRepo.h */,
+				89E5F72723A2E86D008ADC6F /* ZBBaseRepo.m */,
 			);
 			path = Downloads;
 			sourceTree = "<group>";
@@ -1180,6 +1185,7 @@
 				3635D6AF2299C4E7008D4CD5 /* ZBFeaturedCollectionViewCell.m in Sources */,
 				89C5FDF821B1B3AF00A10E58 /* ZBPackageListTableViewController.m in Sources */,
 				89C5FDE521B1B13700A10E58 /* ZBRefreshViewController.m in Sources */,
+				89E5F72823A2E86D008ADC6F /* ZBBaseRepo.m in Sources */,
 				3671B52222CB07F9008FD737 /* ZBHomeTableViewController.m in Sources */,
 				36A33CE222C9AD420054A577 /* ZBChangeLogTableViewController.m in Sources */,
 				89C5FDF021B1B13800A10E58 /* main.m in Sources */,
