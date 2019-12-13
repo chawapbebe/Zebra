@@ -357,7 +357,7 @@
 }
 
 + (NSString * _Nonnull)debianArchitecture {
-    return @"binary-iphoneos-arm";
+    return @"iphoneos-arm";
 }
 
 // Dark mode

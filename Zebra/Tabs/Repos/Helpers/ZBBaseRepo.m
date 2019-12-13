@@ -64,7 +64,7 @@
             NSString *mainDirectory = [NSString stringWithFormat:@"%@dists/%@/", repositoryURL, distribution];
             mainDirectoryURL = [NSURL URLWithString:mainDirectory];
             
-            NSString *packagesDirectory = [mainDirectory stringByAppendingPathComponent:[NSString stringWithFormat:@"%@/%@/", components[0], [ZBDevice debianArchitecture]]];
+            NSString *packagesDirectory = [mainDirectory stringByAppendingPathComponent:[NSString stringWithFormat:@"%@/binary-%@/", components[0], [ZBDevice debianArchitecture]]];
             packagesDirectoryURL = [NSURL URLWithString:packagesDirectory];
             
             releaseURL = [mainDirectoryURL URLByAppendingPathComponent:@"Release"];
