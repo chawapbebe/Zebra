@@ -19,6 +19,9 @@
 + (NSString *_Nullable)deviceModelID;
 + (NSString *_Nullable)machineID;
 + (NSString *_Nonnull)deviceType;
++ (NSString *_Nonnull)debianArchitecture;
+
+
 + (void)hapticButton;
 
 // Commands

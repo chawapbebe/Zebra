@@ -356,6 +356,10 @@
     return @"iPhone/iPod";
 }
 
++ (NSString * _Nonnull)debianArchitecture {
+    return @"binary-iphoneos-arm";
+}
+
 // Dark mode
 + (BOOL)darkModeEnabled {
     return [[NSUserDefaults standardUserDefaults] boolForKey:@"darkMode"];
