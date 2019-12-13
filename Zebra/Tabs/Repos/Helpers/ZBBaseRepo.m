@@ -16,8 +16,8 @@
 @synthesize repositoryURL;
 @synthesize distribution;
 @synthesize components;
-@synthesize maindirectoryURL;
-@synthesize packagesDirecctoryURL;
+@synthesize mainDirectoryURL;
+@synthesize packagesDirectoryURL;
 @synthesize releaseURL;
 @synthesize packagesSaveName;
 @synthesize releaseSaveName;
@@ -62,15 +62,15 @@
             NSString *mainDirectory = [NSString stringWithFormat:@"%@dists/%@/", repositoryURL, distribution];
             mainDirectoryURL = [NSURL URLWithString:mainDirectory];
             
-            NSString *packagesDirectory = [mainDirectory stringByAppendingPathComponent:[NSString stringWithFormat:@"%@/%@/", components[0], [ZBDevice architectureType]]];
+            NSString *packagesDirectory = [mainDirectory stringByAppendingPathComponent:[NSString stringWithFormat:@"%@/%@/", components[0], [ZBDevice debianArchitecture]]];
             packagesDirectoryURL = [NSURL URLWithString:packagesDirectory];
             
-            releaseURL = [directoryURL URLByAppendingPathComponent:@"Release"];
+            releaseURL = [mainDirectoryURL URLByAppendingPathComponent:@"Release"];
         }
         else {
             mainDirectoryURL = [NSURL URLWithString:repositoryURL];
             packagesDirectoryURL = mainDirectoryURL;
-            releaseURL = [directoryURL URLByAppendingPathComponent:@"Release"];
+            releaseURL = [mainDirectoryURL URLByAppendingPathComponent:@"Release"];
         }
     }
     
@@ -78,7 +78,6 @@
 }
 
 - (id)initFromDebLine:(NSString *)debLine {
-    
     NSMutableArray *lineComponents = [[debLine componentsSeparatedByString:@" "] mutableCopy];
     [lineComponents removeObject:@""]; //Remove empty strings from the line which exist for some reason
     if ([debLine characterAtIndex:0] == '#') return NULL;
