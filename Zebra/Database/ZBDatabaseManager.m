@@ -1644,16 +1644,16 @@
 
 #pragma mark - Hyena Delegate
 
-- (void)predator:(nonnull ZBDownloadManager *)downloadManager finishedAllDownloads:(nonnull NSDictionary *)filenames {
+- (void)finishedAllDownloads:(nonnull NSDictionary *)filenames {
     [self parseRepos:filenames];
 }
 
-- (void)predator:(nonnull ZBDownloadManager *)downloadManager startedDownloadForFile:(nonnull NSString *)filename {
+- (void)startedDownloadForFile:(nonnull NSString *)filename {
     [self bulkSetRepo:filename busy:YES];
     [self bulkPostStatusUpdate:[NSString stringWithFormat:@"Downloading %@\n", filename] atLevel:ZBLogLevelDescript];
 }
 
-- (void)predator:(nonnull ZBDownloadManager *)downloadManager finishedDownloadForFile:(NSString *_Nullable)filename withError:(NSError * _Nullable)error {
+- (void)finishedDownloadForFile:(NSString *_Nullable)filename withError:(NSError * _Nullable)error {
     [self bulkSetRepo:filename busy:NO];
     if (error != NULL) {
         if (filename) {
@@ -1669,6 +1669,10 @@
 - (void)postStatusUpdate:(NSString *)status atLevel:(ZBLogLevel)level {
     ZBLog(@"[Zebra] I'll forward your request... %@", status);
     [self bulkPostStatusUpdate:status atLevel:level];
+}
+
+- (void)startedRepoDownload:(ZBBaseRepo *)baseRepo {
+    NSLog(@"repo started: %@", baseRepo);
 }
 
 #pragma mark - Helper methods
