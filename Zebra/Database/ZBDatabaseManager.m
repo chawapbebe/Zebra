@@ -1675,6 +1675,10 @@
     NSLog(@"repo started: %@", baseRepo);
 }
 
+- (void)finishedRepoDownload:(ZBBaseRepo *)baseRepo withErrors:(NSArray<NSError *> *)errors {
+    NSLog(@"repo finished: %@ error: %@", baseRepo, errors[0].localizedDescription);
+}
+
 #pragma mark - Helper methods
 
 - (NSArray *)cleanUpDuplicatePackages:(NSArray <ZBPackage *> *)packageList {
