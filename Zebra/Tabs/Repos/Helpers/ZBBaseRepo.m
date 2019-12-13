@@ -16,7 +16,8 @@
 @synthesize repositoryURL;
 @synthesize distribution;
 @synthesize components;
-@synthesize directoryURL;
+@synthesize maindirectoryURL;
+@synthesize packagesDirecctoryURL;
 @synthesize releaseURL;
 @synthesize packagesSaveName;
 @synthesize releaseSaveName;
@@ -57,13 +58,18 @@
         self->distribution = distribution;
         self->components = components;
         
-        if (![self->distribution isEqualToString:@"./"]) { //Set packages and release URLs to follow dist format
-            NSString *mainDirectory = [NSString stringWithFormat:@"%@/dists/%@/%@/%@/", self->repositoryURL, self->distribution, self->components[0], [ZBDevice debianArchitecture]];
-            directoryURL = [NSURL URLWithString:mainDirectory];
+        if (![distribution isEqualToString:@"./"]) { //Set packages and release URLs to follow dist format
+            NSString *mainDirectory = [NSString stringWithFormat:@"%@dists/%@/", repositoryURL, distribution];
+            mainDirectoryURL = [NSURL URLWithString:mainDirectory];
+            
+            NSString *packagesDirectory = [mainDirectory stringByAppendingPathComponent:[NSString stringWithFormat:@"%@/%@/", components[0], [ZBDevice architectureType]]];
+            packagesDirectoryURL = [NSURL URLWithString:packagesDirectory];
+            
             releaseURL = [directoryURL URLByAppendingPathComponent:@"Release"];
         }
         else {
-            directoryURL = [NSURL URLWithString:repositoryURL];
+            mainDirectoryURL = [NSURL URLWithString:repositoryURL];
+            packagesDirectoryURL = mainDirectoryURL;
             releaseURL = [directoryURL URLByAppendingPathComponent:@"Release"];
         }
     }
