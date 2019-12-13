@@ -22,6 +22,8 @@
 @synthesize packagesSaveName;
 @synthesize releaseSaveName;
 @synthesize debLine;
+@synthesize releaseTaskIdentifier;
+@synthesize packagesTaskIdentifier;
 
 + (NSArray *)baseReposFromSourceList:(NSString *)sourceListPath {
     NSError *readError;

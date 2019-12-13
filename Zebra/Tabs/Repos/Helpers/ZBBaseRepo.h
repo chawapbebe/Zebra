@@ -57,6 +57,12 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, strong) NSString *debLine;
 
+/*! @brief An identifier of a NSURLSessionDownloadTask to retrieve information about the task downloading the repository's release file */
+@property NSUInteger releaseTaskIdentifier;
+
+/*! @brief An identifier of a NSURLSessionDownloadTask to retrieve information about the task downloading the repository's package file */
+@property NSUInteger packagesTaskIdentifier;
+
 /*!
  @brief Creates an array of ZBBaseRepo instances from a sources.list file
  @discussion Reads the file located at sourcesListPath and creates one ZBBaseRepo instance per line if the line is not a comment (or contains an error)
