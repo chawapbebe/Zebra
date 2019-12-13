@@ -35,8 +35,9 @@
     NSArray *debLines = [sourceListContents componentsSeparatedByString:@"\n"];
     NSMutableArray *baseRepos = [NSMutableArray new];
     for (NSString *debLine in debLines) {
-        if ([debLine characterAtIndex:0] == '#') continue;
-        if (![debLine isEqualToString:@""] && [debLine characterAtIndex:0]) {
+        if (![debLine isEqualToString:@""]) {
+            if ([debLine characterAtIndex:0] == '#') continue;
+            
             ZBBaseRepo *repo = [[ZBBaseRepo alloc] initFromDebLine:debLine];
             if (repo) {
                 [baseRepos addObject:repo];
