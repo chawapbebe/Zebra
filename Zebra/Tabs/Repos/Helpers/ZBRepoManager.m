@@ -349,22 +349,22 @@
     [task resume];
 }
 
-- (NSString *)debLineFromRepo:(ZBRepo *)repo {
-    NSMutableString *output = [NSMutableString string];
-    if ([repo defaultRepo]) {
-        NSString *debLine = [self knownDebLineFromURLString:[repo baseURL]];
-        if (debLine) {
-            [output appendString:debLine];
-        } else {
-            NSString *repoURL = [[repo baseURL] stringByDeletingLastPathComponent];
-            repoURL = [repoURL stringByDeletingLastPathComponent]; // Remove last two path components
-            [output appendFormat:@"deb %@%@/ %@ %@\n", [repo isSecure] ? @"https://" : @"http://", repoURL, [repo suite], [repo components]];
-        }
-    } else {
-        [output appendFormat:@"deb %@%@ ./\n", [repo isSecure] ? @"https://" : @"http://", [repo baseURL]];
-    }
-    return output;
-}
+//- (NSString *)debLineFromRepo:(ZBRepo *)repo {
+//    NSMutableString *output = [NSMutableString string];
+//    if ([repo defaultRepo]) {
+//        NSString *debLine = [self knownDebLineFromURLString:[repo baseURL]];
+//        if (debLine) {
+//            [output appendString:debLine];
+//        } else {
+//            NSString *repoURL = [[repo baseURL] stringByDeletingLastPathComponent];
+//            repoURL = [repoURL stringByDeletingLastPathComponent]; // Remove last two path components
+//            [output appendFormat:@"deb %@%@/ %@ %@\n", [repo isSecure] ? @"https://" : @"http://", repoURL, [repo suite], [repo components]];
+//        }
+//    } else {
+//        [output appendFormat:@"deb %@%@ ./\n", [repo isSecure] ? @"https://" : @"http://", [repo baseURL]];
+//    }
+//    return output;
+//}
 
 - (void)addSources:(NSArray<NSURL *> *)sourceURLs completion:(void (^)(BOOL success, NSError *error))completion {
     NSMutableString *output = [NSMutableString string];
@@ -424,7 +424,7 @@
     
     ZBDatabaseManager *databaseManager = [ZBDatabaseManager sharedInstance];
     for (ZBRepo *repo in [databaseManager repos]) {
-        if (![[delRepo baseFileName] isEqualToString:[repo baseFileName]]) {
+        if (![[delRepo baseFilename] isEqualToString:[repo baseFilename]]) {
             [output appendString:[self debLineFromRepo:repo]];
         }
     }
