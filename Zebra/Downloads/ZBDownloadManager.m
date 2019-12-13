@@ -83,7 +83,7 @@
         ++tasks;
         [releaseTask resume];
         
-        NSMutableURLRequest *packagesRequest = [[NSMutableURLRequest alloc] initWithURL:repo.directoryURL];
+        NSMutableURLRequest *packagesRequest = [[NSMutableURLRequest alloc] initWithURL:[repo.directoryURL URLByAppendingPathComponent:@"Packages.bz2"]];
         if (!ignore) {
             [packagesRequest setValue:[self lastModifiedDateForFile:repo.packagesSaveName] forHTTPHeaderField:@"If-Modified-Since"];
         }
