@@ -371,7 +371,7 @@
     
     ZBDatabaseManager *databaseManager = [ZBDatabaseManager sharedInstance];
     for (ZBRepo *repo in [databaseManager repos]) {
-        [output appendString:[self debLineFromRepo:repo]];
+        [output appendString:[repo debLine]];
     }
     
     for (NSURL *sourceURL in sourceURLs) {
@@ -425,7 +425,7 @@
     ZBDatabaseManager *databaseManager = [ZBDatabaseManager sharedInstance];
     for (ZBRepo *repo in [databaseManager repos]) {
         if (![[delRepo baseFilename] isEqualToString:[repo baseFilename]]) {
-            [output appendString:[self debLineFromRepo:repo]];
+            [output appendString:[repo debLine]];
         }
     }
     
