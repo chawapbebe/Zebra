@@ -80,8 +80,8 @@
     // This has to be registered anyway due to repo payment support late check
     [self.featuredCollection registerNib:[UINib nibWithNibName:@"ZBFeaturedCollectionViewCell" bundle:nil] forCellWithReuseIdentifier:@"imageCell"];
     [self checkFeaturedPackages];
-    if (!self.repoEndpoint && [[_keychain stringForKey:repo.baseURL] length] != 0) {
-        self.repoEndpoint = [_keychain stringForKey:repo.baseURL];
+    if (!self.repoEndpoint && [[_keychain stringForKey:repo.repositoryURL] length] != 0) {
+        self.repoEndpoint = [_keychain stringForKey:repo.repositoryURL];
     }
     [self setupEndpointButtons];
 }
@@ -119,10 +119,10 @@
     [self.tableView layoutIfNeeded];
     if (repo.supportsFeaturedPackages) {
         NSString *requestURL;
-        if ([repo.baseURL hasSuffix:@"/"]) {
-            requestURL = [NSString stringWithFormat:@"https://%@sileo-featured.json", repo.baseURL];
+        if ([repo.repositoryURL hasSuffix:@"/"]) {
+            requestURL = [NSString stringWithFormat:@"https://%@sileo-featured.json", repo.repositoryURL];
         } else {
-            requestURL = [NSString stringWithFormat:@"https://%@/sileo-featured.json", repo.baseURL];
+            requestURL = [NSString stringWithFormat:@"https://%@/sileo-featured.json", repo.repositoryURL];
         }
         NSURL *checkingURL = [NSURL URLWithString:requestURL];
         NSURLSession *session = [NSURLSession sharedSession];

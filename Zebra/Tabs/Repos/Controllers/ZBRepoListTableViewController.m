@@ -119,12 +119,12 @@
     
     for (ZBRepo *repo in [self.databaseManager repos]) {
         if (repo.secure) {
-            NSString *host = [[NSURL URLWithString:[NSString stringWithFormat:@"https://%@", repo.baseURL]] host];
+            NSString *host = [[NSURL URLWithString:[NSString stringWithFormat:@"https://%@", repo.repositoryURL]] host];
             if (host) {
                 [repos addObject:host];
             }
         } else {
-            NSString *host = [[NSURL URLWithString:[NSString stringWithFormat:@"http://%@", repo.baseURL]] host];
+            NSString *host = [[NSURL URLWithString:[NSString stringWithFormat:@"http://%@", repo.repositoryURL]] host];
             if (host) {
                 [repos addObject:host];
             }
@@ -385,7 +385,7 @@
     for (ZBRepo *object in array) {
         NSUInteger index = [collation sectionForObject:object collationStringSelector:selector];
         NSMutableArray *section = [unsortedSections objectAtIndex:index];
-        sourceIndexes[[object baseFileName]] = @((index << 16) | section.count);
+        sourceIndexes[[object baseFilename]] = @((index << 16) | section.count);
         [section addObject:object];
     }
     NSUInteger lastIndex = 0;
@@ -434,12 +434,12 @@
     cell.repoLabel.text = [source origin];
     
     NSDictionary *busyList = ((ZBTabBarController *)self.tabBarController).repoBusyList;
-    [self setSpinnerVisible:[busyList[[source baseFileName]] boolValue] forCell:cell];
+    [self setSpinnerVisible:[busyList[[source baseFilename]] boolValue] forCell:cell];
     
     if ([source isSecure]) {
-        cell.urlLabel.text = [NSString stringWithFormat:@"https://%@", [source shortURL]];
+        cell.urlLabel.text = [NSString stringWithFormat:@"https://%@", [source displayableURL]];
     } else {
-        cell.urlLabel.text = [NSString stringWithFormat:@"http://%@", [source shortURL]];
+        cell.urlLabel.text = [NSString stringWithFormat:@"http://%@", [source displayableURL]];
     }
     [cell.iconImageView sd_setImageWithURL:[source iconURL] placeholderImage:[UIImage imageNamed:@"Unknown"]];
     
@@ -452,7 +452,7 @@
 - (void)tableView:(UITableView *)tableView willDisplayCell:(ZBRepoTableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath {
     ZBRepo *source = [self sourceAtIndexPath:indexPath];
     NSDictionary *busyList = ((ZBTabBarController *)self.tabBarController).repoBusyList;
-    [self setSpinnerVisible:[busyList[[source baseFileName]] boolValue] forCell:cell];
+    [self setSpinnerVisible:[busyList[[source baseFilename]] boolValue] forCell:cell];
 }
 
  - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -580,7 +580,7 @@
 
 - (void)delewhoop:(NSNotification *)notification {
     ZBRepo *repo = (ZBRepo *)[[notification userInfo] objectForKey:@"repo"];
-    NSInteger pos = [sourceIndexes[[repo baseFileName]] integerValue];
+    NSInteger pos = [sourceIndexes[[repo baseFilename]] integerValue];
     [self tableView:self.tableView commitEditingStyle:UITableViewCellEditingStyleDelete forRowAtIndexPath:[self indexPathForPosition:pos]];
 }
 

@@ -15,11 +15,16 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface ZBRepo : ZBBaseRepo
 @property (nonatomic, strong) NSString *origin;
-@property (nonatomic, strong) NSString *desc;
-@property (nonatomic, strong) NSString *baseFileName;
+@property (nonatomic, strong) NSString *label;
+@property (nonatomic, strong) NSString *version;
+@property (nonatomic, strong) NSString *codename;
+@property (nonatomic, strong) NSString *architecture;
+@property (nonatomic, strong) NSString *repoDescription;
+@property (nonatomic, strong) NSString *baseFilename;
 @property (nonatomic) BOOL secure;
-@property (nonatomic) BOOL supportSileoPay;
 @property (nonatomic) int repoID;
+
+@property (nonatomic) BOOL supportSileoPay;
 @property (nonatomic, strong) NSURL *iconURL;
 @property (nonatomic) BOOL supportsFeaturedPackages;
 @property (nonatomic) BOOL checkedSupportFeaturedPackages;

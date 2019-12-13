@@ -12,7 +12,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface ZBBaseRepo : NSObject
 @property (nonatomic, strong) NSString *archiveType;
-@property (nonatomic, strong) NSString *repoistoryURL;
+@property (nonatomic, strong) NSString *repositoryURL;
 @property (nonatomic, strong) NSString *distribution;
 @property (nonatomic, strong) NSArray *components;
 + (NSArray *)baseReposFromSourceList:(NSString *)sourceListPath;

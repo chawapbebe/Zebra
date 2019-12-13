@@ -65,7 +65,7 @@
     self.tableData = [[NSMutableArray alloc] init];
     
     for (ZBRepo *repo in sources) {
-        if ([[self.keychain stringForKey:repo.baseURL] length] != 0) {
+        if ([[self.keychain stringForKey:repo.repositoryURL] length] != 0) {
             [self.tableData addObject:repo];
         }
     }
@@ -96,7 +96,7 @@
     
     cell.repoLabel.text = [source origin];
 
-    if (![self checkAuthenticatedRepo:[_keychain stringForKey:[source baseURL]]]) {
+    if (![self checkAuthenticatedRepo:[_keychain stringForKey:[source repositoryURL]]]) {
         cell.urlLabel.text = NSLocalizedString(@"Login", @"");
     } else {
         cell.urlLabel.text = NSLocalizedString(@"Purchases", @"");
@@ -108,7 +108,7 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(nonnull NSIndexPath *)indexPath {
     ZBRepo *source = [self.tableData objectAtIndex:indexPath.row];
-    currentRepoEndpoint = [_keychain stringForKey:[source baseURL]];
+    currentRepoEndpoint = [_keychain stringForKey:[source repositoryURL]];
     if (![self checkAuthenticatedRepo:currentRepoEndpoint]) {
         NSString *urlString = [NSString stringWithFormat:@"%@authenticate?udid=%@&model=%@", currentRepoEndpoint, [ZBDevice UDID], [ZBDevice deviceModelID]];
         NSURL *destinationUrl = [NSURL URLWithString:urlString];

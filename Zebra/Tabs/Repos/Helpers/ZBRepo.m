@@ -16,12 +16,19 @@
 @implementation ZBRepo
 
 @synthesize origin;
-@synthesize desc;
-@synthesize baseFileName;
+@synthesize label;
+@synthesize version;
+@synthesize codename;
+@synthesize architecture;
+@synthesize repoDescription;
+@synthesize baseFilename;
 @synthesize secure;
 @synthesize repoID;
-@synthesize iconURL;
+
 @synthesize supportSileoPay;
+@synthesize iconURL;
+@synthesize supportsFeaturedPackages;
+@synthesize checkedSupportFeaturedPackages;
 @synthesize displayableURL;
 
 + (ZBRepo *)repoMatchingRepoID:(int)repoID {
@@ -31,9 +38,9 @@
 + (ZBRepo *)localRepo:(int)repoID {
     ZBRepo *local = [[ZBRepo alloc] init];
     [local setOrigin:NSLocalizedString(@"Local Repository", @"")];
-    [local setDesc:NSLocalizedString(@"Locally installed packages", @"")];
+    [local setRepoDescription:NSLocalizedString(@"Locally installed packages", @"")];
     [local setRepoID:repoID];
-    [local setBaseFileName:@"/var/lib/dpkg/status"];
+    [local setBaseFilename:@"/var/lib/dpkg/status"];
     return local;
 }
 
@@ -54,19 +61,24 @@
     self = [super init];
     
     if (self) {
-        const char *originChars = (const char *)sqlite3_column_text(statement, ZBRepoColumnOrigin);
-        const char *descriptionChars = (const char *)sqlite3_column_text(statement, ZBRepoColumnDescription);
-        const char *baseFilenameChars = (const char *)sqlite3_column_text(statement, ZBRepoColumnBaseFilename);
-        const char *baseURLChars = (const char *)sqlite3_column_text(statement, ZBRepoColumnBaseURL);
-        const char *suiteChars = (const char *)sqlite3_column_text(statement, ZBRepoColumnSuite);
-        const char *compChars = (const char *)sqlite3_column_text(statement, ZBRepoColumnComponents);
+        const char *originChars =        (const char *)sqlite3_column_text(statement, ZBRepoColumnOrigin);
+        const char *labelChars =         (const char *)sqlite3_column_text(statement, ZBRepoColumnLabel);
+        const char *suiteChars =         (const char *)sqlite3_column_text(statement, ZBRepoColumnSuite);
+        const char *versionChars =       (const char *)sqlite3_column_text(statement, ZBRepoColumnVersion);
+        const char *codenameChars =      (const char *)sqlite3_column_text(statement, ZBRepoColumnCodename);
+        const char *architecturesChars = (const char *)sqlite3_column_text(statement, ZBRepoColumnArchitectures);
+        const char *componentsChars =    (const char *)sqlite3_column_text(statement, ZBRepoColumnComponents);
+        const char *descriptionChars =   (const char *)sqlite3_column_text(statement, ZBRepoColumnDescription);
+        const char *baseFilenameChars =  (const char *)sqlite3_column_text(statement, ZBRepoColumnBaseFilename);
+        BOOL secure =                                  sqlite3_column_int(statement, ZBRepoColumnSecure);
+        const char *baseURLChars =       (const char *)sqlite3_column_text(statement, ZBRepoColumnBaseURL);
+        int repoID =                                   sqlite3_column_int(statement, ZBRepoColumnRepoID);
         
         NSURL *iconURL;
         NSString *baseURL = baseURLChars != 0 ? [[NSString alloc] initWithUTF8String:baseURLChars] : NULL;
         NSArray *separate = [baseURL componentsSeparatedByString:@"dists"];
         NSString *shortURL = separate[0];
         
-        BOOL secure = sqlite3_column_int(statement, ZBRepoColumnSecure);
         NSString *url = [baseURL stringByAppendingPathComponent:@"CydiaIcon.png"];
         if ([url hasPrefix:@"http://"] || [url hasPrefix:@"https://"]) {
             iconURL = [NSURL URLWithString:url];
@@ -76,17 +88,25 @@
             iconURL = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@", url]];
         }
         
-        [self setDesc:descriptionChars != 0 ? [[NSString alloc] initWithUTF8String:descriptionChars] : NULL];
-        [self setBaseFileName:baseFilenameChars != 0 ? [[NSString alloc] initWithUTF8String:baseFilenameChars] : NULL];
-        [self setBaseURL:baseURL];
         [self setOrigin:originChars != 0 ? [[NSString alloc] initWithUTF8String:originChars] : (baseURL ?: NSLocalizedString(@"Unknown", @""))];
+        [self setLabel:labelChars != 0 ? [[NSString alloc] initWithUTF8String:labelChars] : NULL];
+        [self setVersion:versionChars != 0 ? [[NSString alloc] initWithUTF8String:versionChars] : NULL];
+        [self setCodename:codenameChars != 0 ? [[NSString alloc] initWithUTF8String:codenameChars] : NULL];
+        [self setArchitecture:architecturesChars != 0 ? [[NSString alloc] initWithUTF8String:architecturesChars] : NULL];
+        [self setRepoDescription:descriptionChars != 0 ? [[NSString alloc] initWithUTF8String:descriptionChars] : NULL];
+        [self setBaseFilename:baseFilenameChars != 0 ? [[NSString alloc] initWithUTF8String:baseFilenameChars] : NULL];
+        [self setRepositoryURL:baseURL];
         [self setSecure:secure];
-        [self setRepoID:sqlite3_column_int(statement, ZBRepoColumnRepoID)];
+        [self setRepoID:repoID];
         [self setIconURL:iconURL];
-        [self setDefaultRepo:sqlite3_column_int(statement, ZBRepoColumnDef)];
-        [self setSuite:suiteChars != 0 ? [[NSString alloc] initWithUTF8String:suiteChars] : NULL];
-        [self setComponents:compChars != 0 ? [[NSString alloc] initWithUTF8String:compChars] : NULL];
-        [self setShortURL:shortURL];
+        [self setDistribution:suiteChars != 0 ? [[NSString alloc] initWithUTF8String:suiteChars] : NULL];
+        
+        NSString *componentsLine = componentsChars != 0 ? [[NSString alloc] initWithUTF8String:componentsChars] : NULL;
+        if (componentsLine) {
+            [self setComponents:[componentsLine componentsSeparatedByString:@" "]];
+        }
+        [self setDisplayableURL:shortURL];
+        
         if (secure) {
             NSString *requestURL;
             if ([baseURL hasSuffix:@"/"]) {
@@ -141,7 +161,7 @@
 }
 
 - (BOOL)canDelete {
-    return ![[self baseFileName] isEqualToString:@"getzbra.com_repo_."];
+    return ![[self baseFilename] isEqualToString:@"getzbra.com_repo_."];
 }
 
 - (BOOL)isEqual:(ZBRepo *)object {
@@ -151,11 +171,11 @@
     if (![object isKindOfClass:[ZBRepo class]])
         return NO;
     
-    return [[object baseFileName] isEqual:[self baseFileName]];
+    return [[object baseFilename] isEqual:[self baseFilename]];
 }
 
 - (NSString *)description {
-    return [NSString stringWithFormat: @"%@ %@ %d", origin, shortURL, repoID];
+    return [NSString stringWithFormat: @"%@ %@ %d", origin, displayableURL, repoID];
 }
 
 @end
