@@ -76,6 +76,8 @@
     session = [NSURLSession sessionWithConfiguration:configuration delegate:self delegateQueue:nil];
     for (ZBBaseRepo *repo in repos) {
         NSURLSessionTask *releaseTask = [session downloadTaskWithURL:repo.releaseURL];
+        
+        repo.releaseTaskIdentifier = releaseTask.taskIdentifier;
         [sourceTasksMap setObject:repo forKey:@(releaseTask.taskIdentifier)];
         [releaseTask resume];
         
@@ -100,9 +102,10 @@
     if (!ignore) [packagesRequest setValue:[self lastModifiedDateForFile:repo.packagesSaveName] forHTTPHeaderField:@"If-Modified-Since"];
     
     NSURLSessionTask *packagesTask = [session downloadTaskWithRequest:packagesRequest];
-    [packagesTask resume];
     
+    repo.packagesTaskIdentifier = packagesTask.taskIdentifier;
     [sourceTasksMap setObject:repo forKey:@(packagesTask.taskIdentifier)];
+    [packagesTask resume];
 }
 
 #pragma mark - Downloading Packages
@@ -617,8 +620,15 @@
 
 - (void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask didFinishDownloadingToURL:(NSURL *)location {
     NSURLResponse *response = [downloadTask response];
+    NSInteger responseCode = [(NSHTTPURLResponse *)response statusCode];
+    if (responseCode == 304) {
+        //Since we should never get a 304 for a deb, we can assume this is from a repo.
+        ZBBaseRepo *repo = [sourceTasksMap objectForKey:@(downloadTask.taskIdentifier)];
+        
+        [self handleDownloadedFile:NULL forRepo:repo withError:NULL];
+    }
+    
     NSString *MIMEType = [response MIMEType];
-    NSURL *originalURL = [response URL];
     
     NSArray *acceptableMIMETypes = @[@"text/plain", @"application/x-bzip2", @"application/x-gzip", @"application/x-deb", @"application/x-debian-package"];
     NSUInteger index = [acceptableMIMETypes indexOfObject:MIMEType];
@@ -627,7 +637,6 @@
         index = [acceptableMIMETypes indexOfObject:MIMEType];
     }
     
-    NSInteger responseCode = [(NSHTTPURLResponse *)response statusCode];
     BOOL downloadFailed = (responseCode != 200 && responseCode != 304);
     switch (index) {
         case 0: { //Uncompressed Packages file or a Release file
@@ -820,8 +829,11 @@
             
             BZFILE *bzf = BZ2_bzReadOpen(&bzError, f, 0, 0, NULL, 0);
             if (bzError != BZ_OK) {
-                NSError *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:1337 userInfo:@{NSLocalizedDescriptionKey: [NSString stringWithFormat:@"BZ2_bzReadOpen: %d", bzError]}]; //need to do something with this error
-                return NULL;
+                BZ2_bzReadClose(&bzError, bzf);
+                fclose(f);
+                fclose(output);
+                
+                @throw [self bz2ExceptionForCode:bzError file:path];
             }
             
             while (bzError == BZ_OK) {
@@ -829,19 +841,20 @@
                 if (bzError == BZ_OK || bzError == BZ_STREAM_END) {
                     size_t nwritten = fwrite(buf, 1, nread, output);
                     if (nwritten != (size_t)nread) {
-                        NSError *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:1337 userInfo:@{NSLocalizedDescriptionKey: @"short write"}]; //need to do something with this error
-                        return NULL;
+                        BZ2_bzReadClose(&bzError, bzf);
+                        fclose(f);
+                        fclose(output);
+                        
+                        @throw [NSException exceptionWithName:@"Short Write" reason:@"Did not write enough information to output" userInfo:nil];
                     }
                 }
-            }
-            
-            if (bzError != BZ_STREAM_END) {
-                NSError *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:1337 userInfo:@{NSLocalizedDescriptionKey: [NSString stringWithFormat:@"bzip error after read: %d", bzError]}]; //need to do something with this error
-                [self moveFileFromLocation:[NSURL fileURLWithPath:path] to:[path stringByDeletingPathExtension] completion:^(NSError *error) {
-                    if (error) {
-                        [self->downloadDelegate postStatusUpdate:[NSString stringWithFormat:@"[Zebra] Error while moving file at %@ to %@: %@\n", path, [path stringByDeletingPathExtension], error.localizedDescription] atLevel:ZBLogLevelError];
-                    }
-                }];
+                else {
+                    BZ2_bzReadClose(&bzError, bzf);
+                    fclose(f);
+                    fclose(output);
+                    
+                    @throw [self bz2ExceptionForCode:bzError file:path];
+                }
             }
             
             BZ2_bzReadClose(&bzError, bzf);
@@ -853,6 +866,28 @@
         default: { //Decompression of this file is not supported (ideally this should never happen but we'll keep it in case we support more compression types in the future)
             return path;
         }
+    }
+}
+
+- (NSException *)bz2ExceptionForCode:(int)bzError file:(NSString *)file {
+    NSDictionary *userInfo = @{@"Failing-File": file};
+    switch (bzError) {
+        case BZ_CONFIG_ERROR:
+            return [NSException exceptionWithName:@"Configuration Error" reason:@"The bzip2 library has been mis-compiled." userInfo:userInfo];
+        case BZ_PARAM_ERROR:
+            return [NSException exceptionWithName:@"Parameter Error" reason:@"One of the configured parameters is incorrect." userInfo:userInfo];
+        case BZ_IO_ERROR:
+            return [NSException exceptionWithName:@"IO Error" reason:@"Error reading from compressed file." userInfo:userInfo];
+        case BZ_MEM_ERROR:
+            return [NSException exceptionWithName:@"Memory Error" reason:@"Insufficient memory is available." userInfo:userInfo];
+        case BZ_UNEXPECTED_EOF:
+            return [NSException exceptionWithName:@"Unexpected EOF" reason:@"The compressed file ended before the logical end-of-stream was detected" userInfo:userInfo];
+        case BZ_DATA_ERROR:
+            return [NSException exceptionWithName:@"Data Error" reason:@"A Data Integrity Error was detected in the compressed stream" userInfo:userInfo];
+        case BZ_DATA_ERROR_MAGIC:
+            return [NSException exceptionWithName:@"Data Error" reason:@"Compressed stream is not a bzip2 data file." userInfo:userInfo];
+        default:
+            return [NSException exceptionWithName:@"Unknown BZ2 error" reason:[NSString stringWithFormat:@"bzError: %d", bzError] userInfo:userInfo];
     }
 }
 
