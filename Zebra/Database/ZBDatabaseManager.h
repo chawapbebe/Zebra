@@ -8,6 +8,7 @@
 
 @class ZBPackage;
 @class ZBRepo;
+@class ZBDownloadManager;
 @class UIImage;
 
 #import <Foundation/Foundation.h>

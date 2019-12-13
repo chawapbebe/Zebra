@@ -208,9 +208,11 @@
     if (requested || needsUpdate) {
         [self checkForZebraRepo];
         [self bulkDatabaseStartedUpdate];
-        self.downloadManager = [[ZBDownloadManager alloc] initWithDownloadDelegate:self sourceListPath:[ZBAppDelegate sourcesListPath]];
+        self.downloadManager = [[ZBDownloadManager alloc] initWithDownloadDelegate:self];
         [self bulkPostStatusUpdate:@"Updating Repositories\n" atLevel:ZBLogLevelInfo];
-        [self.downloadManager downloadReposAndIgnoreCaching:!useCaching];
+        
+        NSArray <ZBBaseRepo *> *repos = [ZBBaseRepo baseReposFromSourceList:[ZBAppDelegate sourcesListPath]];
+        [self.downloadManager downloadRepos:repos ignoreCaching:!useCaching];
     } else {
         [self importLocalPackagesAndCheckForUpdates:YES sender:self];
     }
@@ -222,8 +224,9 @@
     databaseBeingUpdated = YES;
     
     [self bulkDatabaseStartedUpdate];
-    self.downloadManager = [[ZBDownloadManager alloc] initWithDownloadDelegate:self repo:repo];
-    [self.downloadManager downloadReposAndIgnoreCaching:!useCaching];
+    
+    self.downloadManager = [[ZBDownloadManager alloc] initWithDownloadDelegate:self];
+    [self.downloadManager downloadRepo:repo ignoreCaching:!useCaching];
 }
 
 - (void)updateRepoURLs:(NSArray <NSURL *> *)repoURLs useCaching:(BOOL)useCaching {
@@ -232,8 +235,8 @@
     databaseBeingUpdated = YES;
     
     [self bulkDatabaseStartedUpdate];
-    self.downloadManager = [[ZBDownloadManager alloc] initWithDownloadDelegate:self repoURLs:repoURLs];
-    [self.downloadManager downloadReposAndIgnoreCaching:!useCaching];
+    self.downloadManager = [[ZBDownloadManager alloc] initWithDownloadDelegate:self];
+    [self.downloadManager downloadRepos:NULL ignoreCaching:!useCaching];
 }
 
 - (void)setHaltDatabaseOperations:(BOOL)halt {
