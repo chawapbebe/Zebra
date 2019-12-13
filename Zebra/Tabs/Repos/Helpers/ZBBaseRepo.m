@@ -8,12 +8,19 @@
 
 #import "ZBBaseRepo.h"
 
+#import <ZBDevice.h>
+
 @implementation ZBBaseRepo
 
 @synthesize archiveType;
-@synthesize repoistoryURL;
+@synthesize repositoryURL;
 @synthesize distribution;
 @synthesize components;
+@synthesize directoryURL;
+@synthesize releaseURL;
+@synthesize packagesSaveName;
+@synthesize releaseSaveName;
+@synthesize debLine;
 
 + (NSArray *)baseReposFromSourceList:(NSString *)sourceListPath {
     NSError *readError;
@@ -30,7 +37,10 @@
     for (NSString *debLine in debLines) {
         if ([debLine characterAtIndex:0] == '#') continue;
         if (![debLine isEqualToString:@""] && [debLine characterAtIndex:0]) {
-            [baseRepos addObject:[[ZBBaseRepo alloc] initWithDebLine:debLine]];
+            ZBBaseRepo *repo = [[ZBBaseRepo alloc] initFromDebLine:debLine];
+            if (repo) {
+                [baseRepos addObject:repo];
+            }
         }
     }
     
@@ -45,12 +55,22 @@
         self->repositoryURL = repositoryURL;
         self->distribution = distribution;
         self->components = components;
+        
+        if (![self->distribution isEqualToString:@"./"]) { //Set packages and release URLs to follow dist format
+            NSString *mainDirectory = [NSString stringWithFormat:@"%@/dists/%@/%@/%@/", self->repositoryURL, self->distribution, self->components[0], [ZBDevice debianArchitecture]];
+            directoryURL = [NSURL URLWithString:mainDirectory];
+            releaseURL = [directoryURL URLByAppendingPathComponent:@"/Release"];
+        }
+        else {
+            directoryURL = [NSURL URLWithString:repositoryURL];
+            releaseURL = [directoryURL URLByAppendingPathComponent:@"/Release"];
+        }
     }
     
     return self;
 }
 
-- (id)initWithDebLine:(NSString *)debLine {
+- (id)initFromDebLine:(NSString *)debLine {
     
     NSMutableArray *lineComponents = [[debLine componentsSeparatedByString:@" "] mutableCopy];
     [lineComponents removeObject:@""]; //Remove empty strings from the line which exist for some reason
@@ -70,27 +90,13 @@
             }
         }
         
-        return [self initWithArchiveType:archiveType repositoryURL:repositoryURL distribution:distribution components:(NSArray *)sourceComponents];
+        ZBBaseRepo *repo = [self initWithArchiveType:archiveType repositoryURL:repositoryURL distribution:distribution components:(NSArray *)sourceComponents];
+        repo.debLine = debLine;
+        
+        return repo;
     }
     
     return [super init];
-}
-
-- (id)initFromRepo:(ZBRepo *)repo {
-    NSMutableString *output = [NSMutableString string];
-    if ([repo defaultRepo]) {
-        NSString *debLine = [self knownDebLineFromURLString:[repo baseURL]];
-        if (debLine) {
-            [output appendString:debLine];
-        } else {
-            NSString *repoURL = [[repo baseURL] stringByDeletingLastPathComponent];
-            repoURL = [repoURL stringByDeletingLastPathComponent]; // Remove last two path components
-            [output appendFormat:@"deb %@%@/ %@ %@\n", [repo isSecure] ? @"https://" : @"http://", repoURL, [repo suite], [repo components]];
-        }
-    } else {
-        [output appendFormat:@"deb %@%@ ./\n", [repo isSecure] ? @"https://" : @"http://", [repo baseURL]];
-    }
-    return output;
 }
 
 @end
