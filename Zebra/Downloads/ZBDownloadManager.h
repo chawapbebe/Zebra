@@ -7,7 +7,7 @@
 //
 
 @class ZBQueue;
-@class ZBRepo;
+@class ZBBaseRepo;
 
 #import <Foundation/Foundation.h>
 #import "ZBDownloadDelegate.h"
@@ -15,20 +15,12 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface ZBDownloadManager : NSObject <NSURLSessionDownloadDelegate, NSURLSessionTaskDelegate>
-@property (nonatomic, strong) NSArray *repos;
-@property (nonatomic, strong) ZBQueue *queue;
-@property (nonatomic, strong) NSURLSession *session;
 @property (nonatomic, weak) id <ZBDownloadDelegate> downloadDelegate;
-@property (nonatomic, strong) NSDictionary <NSString *, NSMutableArray *> *filenames;
+@property (nonatomic, strong) NSURLSession *session;
 - (id)initWithDownloadDelegate:(id <ZBDownloadDelegate>)delegate;
-- (id)initWithDownloadDelegate:(id <ZBDownloadDelegate>)delegate sourceListPath:(NSString *)trail;
-- (id)initWithDownloadDelegate:(id <ZBDownloadDelegate>)delegate repo:(ZBRepo *)repo;
-- (id)initWithDownloadDelegate:(id <ZBDownloadDelegate>)delegate repoURLs:(NSArray <NSURL *> *)repoURLs;
-- (id)initWithSourceListPath:(NSString *)trail;
-- (void)downloadRepo:(ZBRepo *)repo;
-- (void)downloadRepos:(NSArray <ZBRepo *> *)repos ignoreCaching:(BOOL)ignore;
-
-//- (void)downloadReposAndIgnoreCaching:(BOOL)ignore;
+- (void)downloadRepo:(ZBBaseRepo *_Nonnull)repo ignoreCaching:(BOOL)ignore;
+- (void)downloadRepos:(NSArray <ZBBaseRepo *> *_Nonnull)repos ignoreCaching:(BOOL)ignore;
+- (void)downloadPackage:(ZBPackage *)package;
 - (void)downloadPackages:(NSArray <ZBPackage *> *)packages;
 - (void)stopAllDownloads;
 @end
