@@ -10,8 +10,8 @@
 #import <UIKit/UIKit.h>
 #import <Console/ZBLogLevel.h>
 
-@class ZBDownloadManager;
 @class ZBPackage;
+@class ZBBaseRepo;
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -19,9 +19,9 @@ NS_ASSUME_NONNULL_BEGIN
 @optional
 - (void)postStatusUpdate:(NSString *)status atLevel:(ZBLogLevel)level;
 
-- (void)startedRepoDownload:(NSString *)baseFilename;
-- (void)progressUpdate:(CGFloat)progress forRepo:(NSString *)baseFilename;
-- (void)finishedRepoDownload:(NSString *)baseFilename withErrors:(NSArray <NSError *> *_Nullable)errors;
+- (void)startedRepoDownload:(ZBBaseRepo *)baseRepo;
+- (void)progressUpdate:(CGFloat)progress forRepo:(ZBBaseRepo *)baseRepo;
+- (void)finishedRepoDownload:(ZBBaseRepo *)baseRepo withErrors:(NSArray <NSError *> *_Nullable)errors;
 
 - (void)startedPackageDownload:(ZBPackage *)package;
 - (void)progressUpdate:(CGFloat)progress forPackage:(ZBPackage *)package;
