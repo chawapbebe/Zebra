@@ -60,11 +60,11 @@
         if (![self->distribution isEqualToString:@"./"]) { //Set packages and release URLs to follow dist format
             NSString *mainDirectory = [NSString stringWithFormat:@"%@/dists/%@/%@/%@/", self->repositoryURL, self->distribution, self->components[0], [ZBDevice debianArchitecture]];
             directoryURL = [NSURL URLWithString:mainDirectory];
-            releaseURL = [directoryURL URLByAppendingPathComponent:@"/Release"];
+            releaseURL = [directoryURL URLByAppendingPathComponent:@"Release"];
         }
         else {
             directoryURL = [NSURL URLWithString:repositoryURL];
-            releaseURL = [directoryURL URLByAppendingPathComponent:@"/Release"];
+            releaseURL = [directoryURL URLByAppendingPathComponent:@"Release"];
         }
     }
     
