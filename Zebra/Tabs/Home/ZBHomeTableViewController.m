@@ -115,9 +115,9 @@ typedef enum ZBLinksOrder : NSUInteger {
     for (ZBRepo *repo in featuredRepos) {
         NSString *basePlusHttp;
         if (repo.isSecure) {
-            basePlusHttp = [NSString stringWithFormat:@"https://%@", repo.baseURL];
+            basePlusHttp = [NSString stringWithFormat:@"https://%@", repo.repositoryURL];
         } else {
-            basePlusHttp = [NSString stringWithFormat:@"http://%@", repo.baseURL];
+            basePlusHttp = [NSString stringWithFormat:@"http://%@", repo.repositoryURL];
         }
         dispatch_group_enter(group);
         NSURL *requestURL = [NSURL URLWithString:@"sileo-featured.json" relativeToURL:[NSURL URLWithString:basePlusHttp]];
