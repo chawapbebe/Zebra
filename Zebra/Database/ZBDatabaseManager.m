@@ -24,6 +24,7 @@
 @interface ZBDatabaseManager () {
     int numberOfDatabaseUsers;
     int numberOfUpdates;
+    int numberOfRepos;
     NSMutableArray *installedPackageIDs;
     NSMutableArray *upgradePackageIDs;
     BOOL databaseBeingUpdated;
@@ -271,9 +272,6 @@
             }
         }
         
-        createTable(database, 1);
-//        sqlite3_exec(database, "CREATE TABLE PACKAGES_SNAPSHOT AS SELECT PACKAGE, VERSION, REPOID, LASTSEEN FROM PACKAGES WHERE REPOID > 0;", NULL, 0, NULL);
-//        sqlite3_exec(database, "CREATE INDEX tag_PACKAGEVERSION_SNAPSHOT ON PACKAGES_SNAPSHOT (PACKAGE, VERSION);", NULL, 0, NULL);
         sqlite3_int64 currentDate = (int)time(NULL);
         
         if (packagesPath) {
@@ -281,8 +279,6 @@
             baseFileName = [baseFileName stringByReplacingOccurrencesOfString:@"_main_binary-iphoneos-arm" withString:@""];
             
             [self bulkSetRepo:baseFileName busy:YES];
-            
-            [self bulkPostStatusUpdate:[NSString stringWithFormat:@"Parsing %@\n", baseFileName] atLevel:ZBLogLevelDescript];
             
             int repoID = [self repoIDFromBaseFileName:baseFileName];
             if (repoID == -1) { // Repo does not exist in database, create it (this should never happen).
@@ -301,7 +297,10 @@
             [self bulkSetRepo:baseFileName busy:NO];
         }
         
-//        sqlite3_exec(database, "DROP TABLE PACKAGES_SNAPSHOT;", NULL, 0, NULL);
+        if (--numberOfRepos == 0) {
+            [self finishedAllParsing];
+        }
+        
         [self closeDatabase];
     } else {
         [self printDatabaseError];
@@ -1658,18 +1657,57 @@
     [self bulkPostStatusUpdate:status atLevel:level];
 }
 
+- (void)startedDownloads {
+    //Create snapshot tables
+    if ([self openDatabase] == SQLITE_OK) {
+        createTable(database, 1);
+        sqlite3_exec(database, "CREATE TABLE PACKAGES_SNAPSHOT AS SELECT PACKAGE, VERSION, REPOID, LASTSEEN FROM PACKAGES WHERE REPOID > 0;", NULL, 0, NULL);
+        sqlite3_exec(database, "CREATE INDEX tag_PACKAGEVERSION_SNAPSHOT ON PACKAGES_SNAPSHOT (PACKAGE, VERSION);", NULL, 0, NULL);
+        
+        [self closeDatabase];
+    }
+    else {
+        [self printDatabaseError];
+    }
+}
+
+- (void)finishedAllDownloads {
+    _downloadManager = nil;
+}
+
 - (void)startedRepoDownload:(ZBBaseRepo *)baseRepo {
     [self postStatusUpdate:[NSString stringWithFormat:@"Downloading %@", baseRepo.repositoryURL] atLevel:ZBLogLevelDescript];
+    numberOfRepos++;
 }
 
 - (void)finishedRepoDownload:(ZBBaseRepo *)baseRepo withErrors:(NSArray<NSError *> *)errors {
     [self postStatusUpdate:[NSString stringWithFormat:@"Done %@", baseRepo.repositoryURL] atLevel:ZBLogLevelDescript];
-    if (errors) {
+    if (errors) { //Probably want this to log all of the errors instead of posting them from within downloadmanager
         NSLog(@"[Zebra] Error while parsing repo %@: %@", baseRepo.repositoryURL, errors[0].localizedDescription);
+        numberOfRepos--;
         return;
     }
     
-    [self parseRepo:baseRepo];
+    [self postStatusUpdate:[NSString stringWithFormat:@"Parsing %@", baseRepo.repositoryURL] atLevel:ZBLogLevelDescript];
+    [self performSelectorInBackground:@selector(parseRepo:) withObject:baseRepo];
+}
+
+- (void)finishedAllParsing {
+    if ([self openDatabase] == SQLITE_OK) {
+        sqlite3_exec(database, "DROP TABLE PACKAGES_SNAPSHOT;", NULL, 0, NULL);
+        
+        [self bulkPostStatusUpdate:@"Done!\n" atLevel:ZBLogLevelInfo];
+        
+        [self importLocalPackagesAndCheckForUpdates:YES sender:self];
+        [self updateLastUpdated];
+        [self bulkDatabaseCompletedUpdate:numberOfUpdates];
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"ZBDatabaseCompletedUpdate" object:nil];
+        
+        [self closeDatabase];
+    }
+    else {
+        [self printDatabaseError];
+    }
 }
 
 #pragma mark - Helper methods
