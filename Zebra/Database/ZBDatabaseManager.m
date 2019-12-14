@@ -1659,10 +1659,11 @@
 }
 
 - (void)startedRepoDownload:(ZBBaseRepo *)baseRepo {
-    NSLog(@"repo started: %@", baseRepo);
+    [self postStatusUpdate:[NSString stringWithFormat:@"Downloading %@", baseRepo.repositoryURL] atLevel:ZBLogLevelDescript];
 }
 
 - (void)finishedRepoDownload:(ZBBaseRepo *)baseRepo withErrors:(NSArray<NSError *> *)errors {
+    [self postStatusUpdate:[NSString stringWithFormat:@"Done %@", baseRepo.repositoryURL] atLevel:ZBLogLevelDescript];
     if (errors) {
         NSLog(@"[Zebra] Error while parsing repo %@: %@", baseRepo.repositoryURL, errors[0].localizedDescription);
         return;
