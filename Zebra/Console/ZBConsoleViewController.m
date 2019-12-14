@@ -107,6 +107,7 @@
     }
     
     [self setupView];
+    [[UIApplication sharedApplication] setIdleTimerDisabled: YES];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -332,6 +333,7 @@
     [installedPackageIdentifiers removeAllObjects];
     
     [self updateStage:ZBStageFinished];
+    [[UIApplication sharedApplication] setIdleTimerDisabled: NO];
 }
 
 #pragma mark - Button Actions
