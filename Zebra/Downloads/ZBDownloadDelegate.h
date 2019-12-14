@@ -16,6 +16,8 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @protocol ZBDownloadDelegate <NSObject>
+- (void)startedDownloads;
+- (void)finishedAllDownloads;
 @optional
 - (void)postStatusUpdate:(NSString *)status atLevel:(ZBLogLevel)level;
 
