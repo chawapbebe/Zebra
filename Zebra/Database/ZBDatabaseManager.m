@@ -27,7 +27,7 @@
     NSMutableArray *installedPackageIDs;
     NSMutableArray *upgradePackageIDs;
     BOOL databaseBeingUpdated;
-    BOOL haltdDatabaseOperations;
+    BOOL haltDatabaseOperations;
 }
 @end
 
@@ -186,7 +186,7 @@
     databaseBeingUpdated = YES;
     
     BOOL needsUpdate = NO;
-    if (requested && haltdDatabaseOperations) {
+    if (requested && haltDatabaseOperations) {
         [self setHaltDatabaseOperations:false];
     }
     
@@ -240,29 +240,24 @@
 }
 
 - (void)setHaltDatabaseOperations:(BOOL)halt {
-    haltdDatabaseOperations = halt;
+    haltDatabaseOperations = halt;
 }
 
-- (void)parseRepos:(NSDictionary *)filenames {
+- (void)parseRepo:(ZBBaseRepo *)repo {
     [[NSNotificationCenter defaultCenter] postNotificationName:@"disableCancelRefresh" object:nil];
-    if (haltdDatabaseOperations) {
+    if (haltDatabaseOperations) {
         CLS_LOG(@"Database operations halted.");
         NSLog(@"[Zebra] Database operations halted");
-        [self bulkDatabaseCompletedUpdate:numberOfUpdates];
         return;
     }
-    [self bulkPostStatusUpdate:@"Download Completed\n" atLevel:ZBLogLevelInfo];
-    self.downloadManager = nil;
-    NSArray *releaseFiles = filenames[@"release"];
-    NSArray *packageFiles = filenames[@"packages"];
-    
-    [self bulkPostStatusUpdate:[NSString stringWithFormat:@"%d Release files need to be updated\n", (int)[releaseFiles count]] atLevel:ZBLogLevelInfo];
-    [self bulkPostStatusUpdate:[NSString stringWithFormat:@"%d Package files need to be updated\n", (int)[packageFiles count]] atLevel:ZBLogLevelInfo];
 
     if ([self openDatabase] == SQLITE_OK) {
-        for (NSString *releasePath in releaseFiles) {
+        NSString *releasePath = repo.releaseFilePath;
+        NSString *packagesPath = repo.packagesFilePath;
+        
+        if (releasePath) {
             NSString *baseFileName = [[releasePath lastPathComponent] stringByReplacingOccurrencesOfString:@"_Release" withString:@""];
-            
+                
             int repoID = [self repoIDFromBaseFileName:baseFileName];
             if (repoID == -1) { // Repo does not exist in database, create it.
                 repoID = [self nextRepoID];
@@ -277,11 +272,11 @@
         }
         
         createTable(database, 1);
-        sqlite3_exec(database, "CREATE TABLE PACKAGES_SNAPSHOT AS SELECT PACKAGE, VERSION, REPOID, LASTSEEN FROM PACKAGES WHERE REPOID > 0;", NULL, 0, NULL);
-        sqlite3_exec(database, "CREATE INDEX tag_PACKAGEVERSION_SNAPSHOT ON PACKAGES_SNAPSHOT (PACKAGE, VERSION);", NULL, 0, NULL);
+//        sqlite3_exec(database, "CREATE TABLE PACKAGES_SNAPSHOT AS SELECT PACKAGE, VERSION, REPOID, LASTSEEN FROM PACKAGES WHERE REPOID > 0;", NULL, 0, NULL);
+//        sqlite3_exec(database, "CREATE INDEX tag_PACKAGEVERSION_SNAPSHOT ON PACKAGES_SNAPSHOT (PACKAGE, VERSION);", NULL, 0, NULL);
         sqlite3_int64 currentDate = (int)time(NULL);
         
-        for (NSString *packagesPath in packageFiles) {
+        if (packagesPath) {
             NSString *baseFileName = [[packagesPath lastPathComponent] stringByReplacingOccurrencesOfString:@"_Packages" withString:@""];
             baseFileName = [baseFileName stringByReplacingOccurrencesOfString:@"_main_binary-iphoneos-arm" withString:@""];
             
@@ -306,14 +301,7 @@
             [self bulkSetRepo:baseFileName busy:NO];
         }
         
-        sqlite3_exec(database, "DROP TABLE PACKAGES_SNAPSHOT;", NULL, 0, NULL);
-        
-        [self bulkPostStatusUpdate:@"Done!\n" atLevel:ZBLogLevelInfo];
-        
-        [self importLocalPackagesAndCheckForUpdates:YES sender:self];
-        [self updateLastUpdated];
-        [self bulkDatabaseCompletedUpdate:numberOfUpdates];
-        [[NSNotificationCenter defaultCenter] postNotificationName:@"ZBDatabaseCompletedUpdate" object:nil];
+//        sqlite3_exec(database, "DROP TABLE PACKAGES_SNAPSHOT;", NULL, 0, NULL);
         [self closeDatabase];
     } else {
         [self printDatabaseError];
@@ -321,7 +309,7 @@
 }
 
 - (void)importLocalPackagesAndCheckForUpdates:(BOOL)checkForUpdates sender:(id)sender {
-    if (haltdDatabaseOperations) {
+    if (haltDatabaseOperations) {
         NSLog(@"[Zebra] Database operations halted");
         return;
     }
@@ -343,7 +331,7 @@
 }
 
 - (void)importLocalPackages {
-    if (haltdDatabaseOperations) {
+    if (haltDatabaseOperations) {
         NSLog(@"[Zebra] Database operations halted");
         return;
     }
@@ -1667,7 +1655,6 @@
 }
 
 - (void)postStatusUpdate:(NSString *)status atLevel:(ZBLogLevel)level {
-    ZBLog(@"[Zebra] I'll forward your request... %@", status);
     [self bulkPostStatusUpdate:status atLevel:level];
 }
 
@@ -1676,7 +1663,12 @@
 }
 
 - (void)finishedRepoDownload:(ZBBaseRepo *)baseRepo withErrors:(NSArray<NSError *> *)errors {
-    NSLog(@"repo finished: %@ error: %@", baseRepo, errors[0].localizedDescription);
+    if (errors) {
+        NSLog(@"[Zebra] Error while parsing repo %@: %@", baseRepo.repositoryURL, errors[0].localizedDescription);
+        return;
+    }
+    
+    [self parseRepo:baseRepo];
 }
 
 #pragma mark - Helper methods
