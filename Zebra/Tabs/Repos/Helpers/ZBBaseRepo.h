@@ -63,6 +63,18 @@ NS_ASSUME_NONNULL_BEGIN
 /*! @brief An identifier of a NSURLSessionDownloadTask to retrieve information about the task downloading the repository's package file */
 @property NSUInteger packagesTaskIdentifier;
 
+/*! @brief Indicates whether or not the task downloading the Packages file is completed and the repo should be parsed */
+@property BOOL packagesTaskCompleted;
+
+/*! @brief Indicates whether or not the task downloading the Release file is completed and the repo should be parsed */
+@property BOOL releaseTaskCompleted;
+
+/*! @brief A file path that points to the downloaded Packages file (NULL if no file has been downloaded and the database entry should not be updated) */
+@property (nonatomic, strong) NSString *_Nullable packagesFilePath;
+
+/*! @brief A file path that points to the downloaded Release file (NULL if no file has been downloaded and the database entry should not be updated) */
+@property (nonatomic, strong) NSString *_Nullable releaseFilePath;
+
 /*!
  @brief Creates an array of ZBBaseRepo instances from a sources.list file
  @discussion Reads the file located at sourcesListPath and creates one ZBBaseRepo instance per line if the line is not a comment (or contains an error)

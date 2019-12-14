@@ -24,6 +24,10 @@
 @synthesize debLine;
 @synthesize releaseTaskIdentifier;
 @synthesize packagesTaskIdentifier;
+@synthesize packagesTaskCompleted;
+@synthesize releaseFilePath;
+@synthesize releaseTaskCompleted;
+@synthesize packagesFilePath;
 
 + (NSArray *)baseReposFromSourceList:(NSString *)sourceListPath {
     NSError *readError;
