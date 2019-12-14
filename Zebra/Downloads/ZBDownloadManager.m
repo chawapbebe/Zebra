@@ -65,6 +65,8 @@
 
 - (void)downloadRepos:(NSArray <ZBBaseRepo *> *_Nonnull)repos ignoreCaching:(BOOL)ignore {
     self->ignore = ignore;
+    [downloadDelegate startedDownloads];
+    
     NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
     NSDictionary *headers = [self headers];
     if (headers == NULL) {
@@ -282,6 +284,10 @@
     }
     
     [sourceTasksMap removeObjectForKey:@(task.taskIdentifier)];
+    
+    if (![sourceTasksMap count]) {
+        [downloadDelegate finishedAllDownloads];
+    }
 }
 
 - (void)handleDownloadedFile:(NSString *)path forPackage:(ZBPackage *)package withError:(NSError *)error {
