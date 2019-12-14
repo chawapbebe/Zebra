@@ -84,6 +84,8 @@ char *reposSchema() {
 
 const char *repoInsertQuery = "INSERT INTO REPOS(ORIGIN, LABEL, SUITE, VERSION, CODENAME, ARCHITECTURES, COMPONENTS, DESCRIPTION, BASEFILENAME, SECURE, BASEURL, REPOID) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
+const char *repoUpdateQuery = "UPDATE REPOS SET (ORIGIN, LABEL, SUITE, VERSION, CODENAME, ARCHITECTURES, COMPONENTS, DESCRIPTION, BASEFILENAME, SECURE, BASEURL) = (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) WHERE REPOID = ?;";
+
 char *packagesSchema() {
     return "PACKAGES(PACKAGE STRING, NAME STRING, VERSION VARCHAR(16), SHORTDESCRIPTION STRING, LONGDESCRIPTION STRING, SECTION STRING, DEPICTION STRING, TAG STRING, AUTHOR STRING, DEPENDS STRING, CONFLICTS STRING, PROVIDES STRING, REPLACES STRING, FILENAME STRING, ICONURL STRING, REPOID INTEGER, LASTSEEN TIMESTAMP, INSTALLEDSIZE INTEGER, DOWNLOADSIZE INTEGER, PRIORITY STRING, ESSENTIAL STRING)";
 }
@@ -208,7 +210,7 @@ enum PARSEL_RETURN_TYPE importRepoToDatabaseBase(const char *sourcePath, const c
     
     sqlite3_stmt *insertStatement;
     
-    const char *insertQuery = update ? "UPDATE REPOS SET (ORIGIN, LABEL, SUITE, VERSION, CODENAME, ARCHITECTURES, COMPONENTS, DESCRIPTION, BASEFILENAME, SECURE, BASEURL) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) WHERE REPOID = ?;" : repoInsertQuery;
+    const char *insertQuery = update ? repoUpdateQuery : repoInsertQuery;
     
     if (sqlite3_prepare_v2(database, insertQuery, -1, &insertStatement, 0) == SQLITE_OK) {
         sqlite3_bind_text(insertStatement, 1 + ZBRepoColumnOrigin, dict_get(repo, "Origin"), -1, SQLITE_TRANSIENT);
@@ -301,20 +303,19 @@ void createDummyRepo(const char *sourcePath, const char *path, sqlite3 *database
 sqlite3_int64 getCurrentPackageTimestamp(sqlite3 *database, const char *packageIdentifier, const char *version, int repoID) {
     char query[250];
     snprintf(query, sizeof(query), "SELECT LASTSEEN FROM PACKAGES_SNAPSHOT WHERE PACKAGE = \"%s\" AND VERSION = \"%s\" AND REPOID = %d LIMIT 1;", packageIdentifier, version, repoID);
+    
+    sqlite3_int64 timestamp = -1;
     sqlite3_stmt *statement;
-    sqlite3_int64 timestamp = 0;
-    bool found = false;
     if (sqlite3_prepare_v2(database, query, -1, &statement, NULL) == SQLITE_OK) {
         while (sqlite3_step(statement) == SQLITE_ROW) {
             timestamp = sqlite3_column_int64(statement, 0);
-            found = true;
             break;
         }
     } else {
         printf("[Parsel] Error preparing current package timestamp statement: %s\n", sqlite3_errmsg(database));
     }
     sqlite3_finalize(statement);
-    return found ? timestamp : -1;
+    return timestamp;
 }
 
 bool bindPackage(dict **package_, int repoID, int safeID, char *longDescription, char *depends, sqlite3 *database, bool import, sqlite3_int64 currentDate) {
